@@ -1,0 +1,46 @@
+import pandas as pd
+import numpy as np
+
+# 1. Setup Data
+sales_data = {
+    'OrderID': [1, 2, 3, 4, 5],
+    'Product': ['A', 'B', 'A', 'C', 'A'],
+    'Month': ['January', 'February', 'February', 'March', 'March'],
+    'Sales': [250, 300, 200, 400, 150]
+}
+df_sales = pd.DataFrame(sales_data)
+
+feedback_data = {
+    'OrderID': [1, 2, 6, 7, 8],
+    'CustomerID': [101, 102, 103, 104, 105],
+    'Month': ['January', 'February', 'February', 'March', 'March'],
+    'Feedback_Score': [4.5, 4.0, 3.5, 5.0, 4.8]
+}
+df_feedback = pd.DataFrame(feedback_data)
+
+# --- Task 1: Hierarchical Indexing ---
+df_hierarchical = df_sales.set_index(['Product', 'Month']).sort_index()
+print("Hierarchical Index:\n", df_hierarchical)
+
+# --- Task 2: Merging ---
+# Inner: Only overlapping OrderIDs
+merge_inner = pd.merge(df_sales, df_feedback, on='OrderID', how='inner')
+print("\nInner Join (Sales + Feedback):\n", merge_inner)
+
+# --- Task 3: Concatenation ---
+# Vertical: Adding new rows (e.g., next quarter)
+new_sales = pd.DataFrame({'OrderID': [9], 'Product': ['B'], 'Month': ['April'], 'Sales': [320]})
+df_vertical = pd.concat([df_sales, new_sales], axis=0, ignore_index=True)
+
+# --- Task 4: Combine & Fill ---
+# Using combine_first to merge and fill gaps based on Index
+# This merges them and ensures data from 'feedback' fills any holes in 'sales' (if columns overlapped)
+# or simply joins them if columns differ.
+df_combined = df_sales.set_index('OrderID').combine_first(df_feedback.set_index('OrderID'))
+print("\nCombined Data (filled gaps):\n", df_combined.head())
+
+# --- Task 5: Pivot Table ---
+# Rows=Product, Cols=Month, Values=Sales
+df_pivot = df_sales.pivot_table(index='Product', columns='Month', values='Sales', aggfunc='sum')
+print("\nPivoted Data:\n", df_pivot)
+
