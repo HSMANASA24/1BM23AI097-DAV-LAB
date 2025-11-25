@@ -1,0 +1,77 @@
+import pandas as pd
+
+# ----------------------------------------------------
+# Load CSV file
+# ----------------------------------------------------
+df = pd.read_csv("file.csv")   # <-- replace with actual filename
+
+print("\nOriginal Dataset:")
+print(df)
+
+# ----------------------------------------------------
+# 1. Fill missing Age with mean and City with "Unknown"
+# ----------------------------------------------------
+
+# Fill Age missing values with mean age
+df["Age"] = df["Age"].fillna(df["Age"].mean())
+
+# Fill City missing values with "Unknown"
+df["City"] = df["City"].fillna("Unknown")
+
+print("\nDataset After Filling Missing Age & City:")
+print(df)
+
+# ----------------------------------------------------
+# 2. Remove duplicate rows
+# ----------------------------------------------------
+df = df.drop_duplicates()
+
+print("\nDataset After Removing Duplicates:")
+print(df)
+
+# ----------------------------------------------------
+# 3. Fix inconsistent values in Gender
+# Replace "M" → "Male", "F" → "Female"
+# ----------------------------------------------------
+
+gender_map = {
+    "M": "Male",
+    "F": "Female",
+    "m": "Male",
+    "f": "Female"
+}
+
+df["Gender"] = df["Gender"].map(gender_map)
+
+print("\nDataset After Fixing Gender Inconsistencies:")
+print(df)
+
+# ----------------------------------------------------
+# 4. Group Age into Ranges
+# Ranges: 18–30, 30–40, 40–50
+# ----------------------------------------------------
+
+bins = [18, 30, 40, 50]
+labels = ["18–30", "30–40", "40–50"]
+
+df["Age_Group"] = pd.cut(df["Age"], bins=bins, labels=labels)
+
+print("\nDataset with Age Ranges:")
+print(df)
+
+# ----------------------------------------------------
+# 5. Convert City into Dummy Variables
+# ----------------------------------------------------
+
+city_dummies = pd.get_dummies(df["City"], prefix="City")
+
+df = pd.concat([df, city_dummies], axis=1)
+
+print("\nDataset After Dummy Encoding City:")
+print(df)
+
+# ----------------------------------------------------
+# Save Final Output
+# ----------------------------------------------------
+df.to_csv("cleaned_output.csv", index=False)
+print("\nCleaned dataset saved as cleaned_output.csv")
