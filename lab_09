@@ -1,0 +1,57 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# -------------------------------------------------
+# LOAD DATA  (upload train.csv or set path here)
+# -------------------------------------------------
+df = pd.read_csv("train.csv")
+
+# -------------------------------------------------
+# 1. Scatter plot: GrLivArea vs SalePrice
+# -------------------------------------------------
+plt.figure(figsize=(8,6))
+plt.scatter(df["GrLivArea"], df["SalePrice"])
+plt.xlabel("Above Ground Living Area (GrLivArea)")
+plt.ylabel("Sale Price")
+plt.title("GrLivArea vs SalePrice")
+plt.grid(True)
+plt.show()
+
+# -------------------------------------------------
+# 2. Heatmap of correlations
+# -------------------------------------------------
+
+numeric_features = ["GrLivArea", "OverallQual", "TotalBsmtSF", "GarageCars", "YearBuilt", "SalePrice"]
+
+corr = df[numeric_features].corr()
+
+plt.figure(figsize=(10,6))
+sns.heatmap(corr, annot=True, cmap="coolwarm")
+plt.title("Correlation Heatmap of Selected Features")
+plt.show()
+
+# -------------------------------------------------
+# 3. Bubble Chart:
+# X → GrLivArea
+# Y → SalePrice
+# Bubble size → OverallQual
+# Color → YearBuilt (optional)
+# -------------------------------------------------
+
+plt.figure(figsize=(10,6))
+plt.scatter(
+    df["GrLivArea"],
+    df["SalePrice"],
+    s=df["OverallQual"] * 20,   # bubble size
+    c=df["YearBuilt"],          # color mapping
+    cmap="viridis",
+    alpha=0.6
+)
+
+plt.xlabel("GrLivArea")
+plt.ylabel("SalePrice")
+plt.title("Bubble Chart: GrLivArea vs SalePrice vs YearBuilt (Size = OverallQual)")
+cbar = plt.colorbar()
+cbar.set_label("Year Built")
+plt.show()
