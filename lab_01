@@ -1,0 +1,105 @@
+import pandas as pd
+from scipy.stats import zscore
+
+# --------------------------------------------------
+# 1. Load CSV File
+# --------------------------------------------------
+df = pd.read_csv("Book1.csv")   # <-- replace with your file name
+
+print("\nOriginal Dataset:")
+print(df)
+
+# --------------------------------------------------
+# 1. Identify Missing Values
+# --------------------------------------------------
+print("\nMissing Values (True = Missing):")
+print(df.isnull())
+
+print("\nMissing Count Per Column:")
+print(df.isnull().sum())
+
+print("\nNon-Missing (False = Missing):")
+print(df.notnull())
+
+# --------------------------------------------------
+# 1. Handle Missing Values: Occupation & SL
+# --------------------------------------------------
+
+# Fill missing Occupation with mode
+df["Occupation"] = df["Occupation"].fillna(df["Occupation"].mode()[0])
+
+# Fill missing Satisfaction Level (SL) with mean
+df["SL"] = df["SL"].fillna(df["SL"].mean())
+
+# Drop rows where too many values missing (optional)
+df_cleaned = df.dropna(thresh=6)
+
+print("\nDataset After Filling Missing Occupation & SL:")
+print(df)
+
+# --------------------------------------------------
+# 2. Convert Satisfaction Level to High / Low
+# --------------------------------------------------
+def convert_sl(value):
+    return "High" if value > 0.7 else "Low"
+
+df["SL_Binary"] = df["SL"].apply(convert_sl)
+
+print("\nSatisfaction Level Converted to Binary:")
+print(df[["SL", "SL_Binary"]])
+
+# --------------------------------------------------
+# 3. Map Purchase History ('PH') to Numeric
+# --------------------------------------------------
+mapping = {"h": 2, "m": 1, "l": 0}
+df["Purchase_History_Num"] = df["PH"].map(mapping)
+
+print("\nPurchase History Mapped to Numbers:")
+print(df[["PH", "Purchase_History_Num"]])
+
+# --------------------------------------------------
+# 4. Outlier Detection in Income
+# --------------------------------------------------
+
+# Z-score Method
+df["Income_Z"] = zscore(df["Income"])
+
+outliers_z = df[df["Income_Z"].abs() > 3]
+print("\nZ-score Outliers in Income:")
+print(outliers_z[["Income", "Income_Z"]])
+
+# IQR Method
+Q1 = df["Income"].quantile(0.25)
+Q3 = df["Income"].quantile(0.75)
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+outliers_iqr = df[(df["Income"] < lower) | (df["Income"] > upper)]
+
+print("\nIQR Outliers in Income:")
+print(outliers_iqr["Income"])
+
+# --------------------------------------------------
+# 5. Handle Missing Values in Years (Years_Employed)
+# --------------------------------------------------
+
+print("\nMissing Values in Years Before Fill:")
+print(df["Years"].isnull().sum())
+
+# Fill using median (recommended for skewed data)
+df["Years"] = df["Years"].fillna(df["Years"].median())
+
+print("\nYears After Median Imputation:")
+print(df["Years"])
+
+# --------------------------------------------------
+# Final Dataset
+# --------------------------------------------------
+print("\nFinal Cleaned Dataset:")
+print(df)
+
+# Save output to new CSV
+
+df.to_csv("cleaned_output.csv", index=False)
